@@ -23,6 +23,8 @@ description: >-
   Insights, updates, and technical deep dives from the CS360 engineering team.
 baseurl: "/engineeringblog" # the subpath of your site, e.g. /blog
 url: "https://caresmartz-360.github.io" # the base hostname & protocol for your site, e.g. http://example.com
+github:
+  repository_url: https://github.com/caresmartz-360/engineeringblog
 # Build settings
 theme: jekyll-theme-hacker
 plugins:
