@@ -10,18 +10,20 @@ How Dapr Handles Event-Driven Architecture (And Why It Matters More Than You Thi
 <!--more-->
 
 ## Introduction: Event-Driven Architecture Is Powerful and Painful
-
-Event-Driven Architecture(EDA) is often described as the natural evolution of modern distributed systems. As applications grow, synchronous request–response patterns start to strain: services block each other, deployments become risky and scaling one capability often requires scaling everything.
-
+<!--more-->
+Event-Driven Architecture (EDA) is often described as the natural evolution of modern distributed systems. As applications grow, synchronous request–response patterns start to strain: services block each other, deployments become risky, and scaling one capability often requires scaling everything.
+ 
 Events promise relief. Services can react to change instead of coordinating around it. Producers and consumers evolve independently. Systems become more resilient to partial failure.
-
+ 
 But anyone who has operated an event-driven system in production knows the other side of the story.
-
+ 
 Message brokers come with steep learning curves. Each service embeds broker-specific SDKs. Retry logic is implemented differently everywhere. Observability is fragmented across libraries and teams. Over time, the system is technically event-driven but operationally fragile.
-
-Dapr(Distributed Application Runtime) exists because this pain is structural, not accidental. Its core idea is simple but opinionated: application developers should not have to become messaging and infrastructure experts just to publish or consume events.
-
-This article explores how Dapr approaches event-driven architecture, how it differs from traditional designs and why its constraints are often a strength rather than a limitation.
+ 
+This is where [Dapr (Distributed Application Runtime)](https://docs.dapr.io/) comes in. Dapr is a portable, event-driven runtime that simplifies building resilient microservices by abstracting common infrastructure concerns—like messaging, state management, and service invocation—behind a set of uniform APIs. At its core, Dapr helps developers build distributed systems without needing to become infrastructure experts.
+ 
+Its core idea is simple but opinionated: application developers should not have to manage messaging internals just to publish or consume events.
+ 
+This article explores how Dapr approaches event-driven architecture, how it differs from traditional designs, and why its constraints are often a strength rather than a limitation.
 
 ---
 
