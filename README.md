@@ -1,6 +1,8 @@
 # CS360 Engineering Blog
 
-Welcome to the CS360 Engineering Blog repository! This is where we share insights, updates, and technical deep dives from our engineering team.
+[![pages-build-deployment](https://github.com/caresmartz-360/engineeringblog/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/caresmartz-360/engineeringblog/actions/workflows/pages/pages-build-deployment)
+
+Welcome to the CS360 Engineering Blog repository! This is where we share insights, updates, and technical deep dives from our engineering team. You can see it live on [https://caresmartz-360.github.io/engineeringblog/](https://caresmartz-360.github.io/engineeringblog/)
 
 ## 🚀 Quick Start for Contributors
 
