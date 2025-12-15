@@ -133,7 +133,11 @@ A typical flow looks like this:
 5. The subscriber’s Dapr sidecar receives the event
 6. The event is delivered to the subscriber service
 
-Service → Dapr → Broker → Dapr → Service
+<!-- Service → Dapr → Broker → Dapr → Service -->
+
+<div style="text-align: center;">
+<img src="{{ site.baseurl }}/assets/How_an_Event_Travels_Through_Dapr.png" alt="How an Event Travels Through Dapr" width="600"/>
+</div>
 
 There are no hidden callbacks, no custom consumer loops and no offset management in application code. This predictability matters. Distributed systems are already hard to debug Dapr avoids adding surprise behavior.
 
