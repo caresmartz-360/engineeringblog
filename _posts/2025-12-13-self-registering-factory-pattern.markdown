@@ -5,9 +5,21 @@ date: 2025-12-13 10:00:00 +0530
 categories: engineering design-patterns
 ---
 
-When building software, one problem comes up often: you have different types of things that do similar jobs, and you need a clean way to pick which one to use. This is where the factory pattern helps. But today, we are going to talk about something even better—the self-registering factory pattern.
+You know the pain. Every time someone needs to add a new payment method, report format, or notification channel, they open the same factory file. That file becomes a bottleneck—not just for deployment, but for confidence.
 
-If you have ever maintained a big switch statement or endless if-else chains just to create objects, this pattern will make your life much easier.
+Here's what happens:
+
+1. A factory class with a hundred-line switch statement
+2. Merge conflicts pile up because everyone touches the same code
+3. Bugs slip through when someone forgets to update one branch
+4. Fear of breaking existing code slows down new features
+5. The factory becomes the most dangerous file in your codebase
+
+The self-registering factory pattern solves this by flipping things around: instead of the factory knowing about every option, each option tells the factory "hey, I exist."
+
+**The trade-off:** You lose the single list where everything lives, but you gain the ability to add new features without changing old code.
+
+If you have ever been afraid to modify a core factory class, this pattern is worth understanding.
 
 ## What is a Factory Pattern?
 
@@ -34,7 +46,7 @@ public class PaymentFactory
 }
 ```
 
-This works, but there is a problem. Every time you add a new payment method, you need to go back and modify this factory class. That violates the Open/Closed Principle—your code should be open for extension but closed for modification.
+This works, but there is a problem. Every time you add a new payment method, you need to go back and modify this factory class. That breaks a basic rule: you should be able to add new features without changing existing code.
 
 ## Enter the Self-Registering Factory
 
@@ -44,20 +56,24 @@ Think of it like a registration desk at a conference. Instead of the organizer m
 
 ## How Does It Work?
 
-The magic happens in two parts:
+It happens in two steps:
 
 ### 1. A Central Registry
 
-First, you create a registry that holds all available implementations:
+First, you create a registry that keeps track of all the payment methods:
 
 ```csharp
 public class PaymentProcessorFactory
 {
+    // Warning: Not thread-safe. In production, use ConcurrentDictionary
+    // or protect with locks during registration phase.
     private static Dictionary<string, Func<IPaymentProcessor>> _processors 
         = new Dictionary<string, Func<IPaymentProcessor>>();
 
     public static void Register(string type, Func<IPaymentProcessor> creator)
     {
+        // Silently overwrites if key exists. Consider logging or throwing
+        // if duplicate registrations indicate a configuration error.
         _processors[type] = creator;
     }
 
@@ -103,64 +119,59 @@ public class PayPalProcessor : IPaymentProcessor
 }
 ```
 
-Notice the static constructor? That runs automatically when the class is first accessed. Each processor registers itself without any central coordinator needing to know about it.
+Notice the static constructor? That runs automatically when the class is first used. Each payment method registers itself without anyone needing to know about it.
 
-## Why This Pattern Matters
+A word of caution: this automatic registration only happens when the class gets loaded into memory. If nothing in your startup code touches the class, it never registers. This can bite you—tests might work because the test uses the class, but production breaks because nothing does. You may need to explicitly load these classes at startup. Class loading order is not deterministic, so relying on this implicitly can lead to environment-specific bugs.
 
-### 1. Add Features Without Breaking Existing Code
+## Why This Helps
 
-Want to add cryptocurrency payments? Just create a new class:
+### 1. Add New Features Without Touching Old Code
 
-```csharp
-public class CryptoProcessor : IPaymentProcessor
-{
-    static CryptoProcessor()
-    {
-        PaymentProcessorFactory.Register("crypto", () => new CryptoProcessor());
-    }
+Want to add cryptocurrency payments? Create a new class. It registers itself. Done.
 
-    public void ProcessPayment(decimal amount)
-    {
-        // Crypto processing logic
-    }
-}
-```
+### 2. Each Part Handles Its Own Job
 
-The factory doesn't need to change. The existing payment processors don't need to change. You just drop in a new class and it works.
+Each payment processor owns its logic and registration. Clear boundaries make testing and debugging faster.
 
-### 2. Better Separation of Concerns
+### 3. Makes Plugins Easy
 
-Each payment processor is responsible only for its own logic and its own registration. The factory just manages the registry. Clean boundaries mean easier testing and maintenance.
-
-### 3. Plugin Architecture Made Easy
-
-This pattern is perfect for building plugin systems. Each plugin can register itself when loaded, and your core application doesn't need to know what plugins exist.
+Each plugin announces itself when it loads. The core application stays decoupled from what exists.
 
 ## Real World Use Cases
 
-At Caresmartz360, we use patterns like this in several places:
+At Caresmartz360, we use this pattern where extensibility matters more than central control:
 
-**Report Generators:** Different agencies need different report formats—PDF, Excel, CSV, custom templates. Each report generator registers itself, and when an agency requests a report, the factory creates the right generator without our core code needing to know about every possible format.
+**Report Generators:** Adding a new format means dropping in a class, not modifying core rendering logic—faster onboarding, fewer conflicts.
 
-**Notification Channels:** We send notifications through email, SMS, push notifications, and in-app messages. Each channel implementation registers itself, making it trivial to add new channels like WhatsApp or Slack integrations.
+**Notification Channels:** New integrations (WhatsApp, Slack) ship without touching existing channels—reduced coupling, safer deploys.
 
-**EVV Integrations:** Electronic Visit Verification systems vary by state and provider. Each EVV adapter registers itself with the factory, allowing us to support new states or providers without modifying existing integration code.
+**EVV Integrations:** State-specific adapters register themselves—new compliance requirements don't ripple through the system.
+
+## When Not To Use This
+
+Before you refactor every factory in your codebase, understand the trade-offs:
+
+**Small, stable sets:** If you have three payment methods that rarely change, a simple switch statement is clearer. The extra indirection just makes things harder to follow.
+
+**When you need to see everything in one place:** If new engineers need to quickly see all options, or if compliance needs to audit what exists, having registrations scattered everywhere makes discovery harder.
+
+**Speed-critical code:** Dictionaries and function calls add overhead. If your factory runs millions of times per second, measure the cost first.
+
+**Already confusing systems:** If your code is already hard to follow, adding automatic registration that happens behind the scenes makes debugging worse.
 
 ## Things to Watch Out For
 
-While this pattern is powerful, there are some considerations:
+**Startup Timing:** Classes only register when they get loaded. If nothing uses the class at startup, it never registers. You might need to explicitly load these classes early.
 
-**Initialization Timing:** Static constructors run the first time a class is referenced. If your classes are never referenced, they won't register. You might need to explicitly touch each class during application startup.
+**Thread Safety:** If multiple threads run during startup, protect your dictionary with locks or use `ConcurrentDictionary`. Race conditions are hard to debug.
 
-**Thread Safety:** If registrations happen during multi-threaded startup, protect your registry with proper locking.
+**Testing:** Clear your registry between tests, or give each test its own factory instance.
 
-**Testing:** In unit tests, you might need to reset your registry between tests to avoid state leaking from one test to another.
-
-**Discovery:** Without a central list, it can be harder to see what implementations exist. Good documentation and naming conventions help here.
+**Finding What Exists:** You lose the single list of options. Make up for it with admin tools, good logging, or a way to list registered items at runtime.
 
 ## A More Advanced Version
 
-For production systems, you might want more features:
+In real systems, you often need to turn things on and off without deploying: feature flags, emergency shutoffs, customer-specific settings, or admin pages that show what is available. That is when you add extra information:
 
 ```csharp
 public class PaymentProcessorFactory
@@ -199,32 +210,25 @@ public class PaymentProcessorFactory
 }
 ```
 
-This version adds metadata, the ability to enable or disable processors at runtime, and a way to discover what's available.
+The `IsEnabled` flag supports things like gradual rollouts, incident response, and per-environment configuration without deploying new code.
 
 ## The Bigger Picture
 
-The self-registering factory pattern is really about embracing the Open/Closed Principle. Your system becomes modular and extensible without becoming fragile.
+This pattern is about picking the right trade-off. You give up having everything in one place. You get the ability to add new things without changing old things. That trade pays off when your system grows by adding features, not by changing what already exists.
 
-Instead of a central coordinator that knows everything, you build a system where components announce their capabilities. This scales better, tests better, and adapts to change better.
+At Caresmartz360, this helps us add new integrations without touching core code. When a new state requires a different verification format, we add a class. When an agency wants a custom report, we add a generator. The core stays stable.
 
-At Caresmartz360, patterns like this help us move fast while keeping our codebase maintainable. When a new state requires a different EVV format, or when we need to support a new payment gateway, we add new classes rather than modify existing ones. That means less risk, faster delivery, and happier developers.
+But we do not use it everywhere. Simple factories stay simple until they are not.
 
 ## Getting Started
 
-If you want to try this pattern in your own projects:
+1. Start with a factory that changes every sprint because new options keep coming
+2. Verify those options do not depend on each other
+3. Add the registry, migrate one option over, check it works
+4. Migrate the rest one by one
+5. Document how registration works
 
-1. Identify places where you have multiple implementations of the same interface
-2. Look for switch statements or if-else chains that pick which implementation to use
-3. Create a simple registry dictionary
-4. Add static constructors to your implementations
-5. Replace your switch statements with factory lookups
+Begin with one high-churn factory. If it reduces friction, expand. If it complicates things, revert.
 
-Start small. Pick one area and refactor it. You will quickly see the benefits.
 
-## Wrapping Up
-
-The self-registering factory pattern might sound complex, but it's actually quite simple once you see it in action. It's a tool that makes your code more flexible and easier to extend.
-
-Good engineering is about choosing patterns that match your problems. When you need to support multiple implementations and want to avoid tightly coupled code, this pattern is a solid choice.
-
-Your future self, and your teammates, will thank you for it.
+Good engineering is knowing when to use a pattern, not just how to build it.
