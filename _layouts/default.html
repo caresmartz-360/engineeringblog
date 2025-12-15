@@ -24,7 +24,7 @@
 
     <div class="container">
         <section id="main_content">
-            {% if page.title %}
+            {% if page.title and page.title != "Latest Posts" %}
             <h1 class="post-title">{{ page.title }}</h1>
             {% endif %}
             {{ content }}
