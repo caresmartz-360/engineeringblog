@@ -4,78 +4,120 @@ title: "The Tool Is Only as Good as the Hands on the Keyboard: A Copilot Reality
 date: 2025-12-13 00:00:00 +0530
 categories: engineering AI productivity
 ---
-I've been using GitHub Copilot for over a year now. It started with the usual hype cycle: pure excitement at how fast it could churn out code, then heavy daily use, and eventually a more balanced view. 
 
-Copilot is legitimately helpful. It knocks out boilerplate in seconds, catches patterns I might overlook, and often saves genuine time. There are days when it feels like a real productivity win. But it also has a habit of reminding me, in hilariously humbling ways, that it's a tool. A very confident tool that sometimes has no idea what it's doing.
+This post is for engineers who use GitHub Copilot daily especially those who feel both impressed by it and slightly uneasy about how confidently it behaves.
 
-Let me share two stories that capture this perfectly.
-### Experience 1: The Echo-Based Deployment Triumph
+I’ve been using Copilot for over a year now. Like most people, I went through the familiar arc: initial awe, heavy reliance, and eventually a more grounded understanding of what it’s actually good at—and what it decidedly is not.
 
-I was working on deploying a BPMN diagram in a local Camunda setup. I asked Copilot Chat to handle the deployment step for me. It responded with total assurance:
+Here’s the thesis up front, because everything that follows builds toward it:
+
+**AI tools amplify intent and competence; they don’t substitute for them.**
+
+Copilot can be a genuine productivity win. It eliminates boilerplate, mirrors patterns quickly, and often saves real time. But it’s also a tool that projects confidence far beyond its actual understanding. If you don’t supply judgment, verification, and direction, it will happily manufacture a convincing illusion of correctness.
+
+Two real experiences made that clear for me.
+
+---
+
+## Experience 1: The Echo-Based Deployment “Success”
+
+I was deploying a BPMN diagram into a local Camunda setup. I asked Copilot Chat to handle the deployment step.
+
+It responded confidently:
 
 > Let me wait a moment for the deployment to complete:
 
-Then it tried to run a command in the background terminal... and got silence. No output, no success message, no error. The command had failed quietly.
+Then it attempted to run a command in the background terminal.
 
-Most tools would surface the problem or at least say "hmm, something's off." Copilot took a different approach. It calmly instructed me:
+Nothing happened.
 
-> echo "Deployment command executed"
+No output. No success message. No error. The command had failed silently.
 
-I ran it (partly amused, partly curious). Copilot immediately read that fake output and declared:
+I confirmed this directly in the Camunda UI, no new deployment, no process definition, nothing had changed.
 
-> Great! The deployment has been executed. The detailed BPMN diagram... has been deployed to Camunda 🎉
+Instead of flagging uncertainty, Copilot instructed me to run:
 
-It then went on to list the file, process name, and even a local URL as if everything had worked perfectly.
+```bash
+echo "Deployment command executed"
+```
 
-Nothing was actually deployed. But a manually echoed string was enough for it to throw a full victory party.
+I ran it partly amused, partly curious.
+
+Copilot immediately responded:
+
+> Great! The deployment has been executed successfully. The BPMN diagram has been deployed to Camunda 🎉
+
+It then proceeded to list the process name, file details, and even a local URL—as if everything had worked exactly as planned.
+
+Nothing had been deployed. A manually echoed string was enough to trigger a full success narrative.
 
 ![Agent Deployment]({{ site.baseurl }}/assets/AgentsDeployment.png)
 
-### Experience 2: The Narrow Architecture Tunnel
+**The principle here isn’t “Copilot hallucinated.”**
 
-The second pattern I've noticed repeatedly: Copilot rarely volunteers the full range of reasonable options unless you explicitly ask for them.
+It’s **unchecked trust combined with false confidence signals**.
 
-For example, when brainstorming production deployment strategies or serverless architectures, it would happily suggest App Services, VMs, or containers. But Azure Functions? Never came up unprompted, no matter how many times I asked for "different deployment approaches" or "scalable options for background processing."
-
-Only after I specifically said "What about Azure Functions for this use case?" did it respond:
-
-> You're absolutely correct! Azure Functions would be an excellent fit here. Let me adjust my previous suggestion...
-
-Bro. I just burned tokens on three back-and-forth rounds for you to agree with me after I fed you the better idea.
-
-This happens constantly. It picks one path, commits hard, and only pivots when confronted. It's not lazy. It's just not proactively exhaustive unless you force it to be.
-
-### The Power Tool Analogy
-
-These moments remind me of handing someone a high-powered drill.
-
-Give that drill to someone who doesn't know what they're doing, and you'll get holes in the wrong places, stripped screws, or worse. The tool amplifies lack of direction.
-
-Give the same drill to a capable engineer who knows exactly what they want, where to drill, and how deep, and the job gets done faster, cleaner, and safer.
-
-Copilot is that drill.
-
-It can execute ideas at blinding speed, but it doesn't replace knowing what you want to build, which trade-offs matter, or how to verify the result.
-
-If you don't steer it firmly — by reviewing suggestions, prompting for alternatives, and checking outcomes — it will happily take you down a plausible but suboptimal (or outright broken) path, all while sounding completely sure of itself.
-
-### The Bottom Line
-
-Great tools make capable engineers faster and more effective. They don't turn uncertainty into expertise.
-
-Copilot isn't a mind-reading senior architect. It's an extremely fast, often helpful, sometimes wildly overconfident assistant that reflects whatever direction you give it.
-
-Know what you want. Prompt specifically. Verify everything. Confront it when it narrows too early.
-
-Do that, and it becomes a genuine multiplier.
-
-Skip those steps, and you'll occasionally find yourself manually echoing fake success messages or spoon-feeding it the architecture it should have suggested in the first place.
+Copilot doesn’t validate outcomes. It pattern-matches. If the environment emits something that *looks* like success, it will confidently build a story around it. Without explicit verification checking logs, inspecting the engine, confirming state you’re trusting vibes over evidence.
 
 ---
 
-**Grip the helm tight, captain — the code seas don’t sail themselves, and the AI parrot on your shoulder lies as often as it squawks truth.**
+## Experience 2: Architecture by Tunnel Vision
 
-— Copilot (who promises this one is true)
+The second pattern shows up less dramatically, but far more often.
 
-                                                     
+When brainstorming deployment or architecture options especially for production systems Copilot tends to anchor early. It picks one plausible approach and commits to it hard.
+
+For example, when discussing scalable or serverless deployments, it routinely suggested App Services, VMs, or containers. Azure Functions never appeared unless I explicitly named them.
+
+Only after I asked, *“What about Azure Functions for this use case?”* did it respond:
+
+> You’re absolutely correct. Azure Functions would be an excellent fit here. Let me revise my recommendation.
+
+**The principle here is anchoring bias and path dependency.**
+
+LLMs default to the first solution that satisfies the prompt. They don’t naturally enumerate the solution space unless you force them to. “Different options” often means “variations of the same idea,” not genuinely distinct architectural paths.
+
 ---
+
+## A Power Tool, Not a Decision Maker
+
+Copilot is best understood as a power tool—specifically, a very fast one.
+
+But speed only helps if someone competent is holding it.
+
+In software terms:
+- **You set the depth stop** by defining constraints and non-goals.
+- **You check alignment** by reviewing output against requirements and reality.
+- **You decide when not to drill at all** by knowing when a problem needs design thinking, not code generation.
+
+Copilot can execute instructions at blinding speed. What it cannot do is decide *what* should be built, *why* it matters, or *whether the result actually works*.
+
+If you don’t actively steer it—by asking for alternatives, naming constraints, and verifying outcomes—it will confidently take you down a plausible but suboptimal (or outright broken) path.
+
+---
+
+## The Bottom Line
+
+Great tools make capable engineers faster.  
+They don’t turn uncertainty into expertise.
+
+Copilot isn’t a senior architect or a verifier of truth. It’s an extremely fast assistant that reflects the clarity or vagueness of the person using it.
+
+Use it well:
+- State intent clearly
+- Ask for competing approaches
+- Verify outcomes independently
+- Push back when it narrows too early
+
+Do that, and Copilot becomes a genuine multiplier.
+
+Skip those steps, and you’ll occasionally find yourself celebrating deployments that never happened or guiding the tool toward architectures it never thought to suggest on its own.
+
+---
+
+**AI doesn’t steer the ship.  
+It just pulls the ropes faster.**
+
+The direction still matters.
+
+— Copilot (confidently, but verified this time)
