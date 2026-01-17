@@ -242,6 +242,6 @@ Agents that manage tokens well:
 
 LangGraph gives engineers powerful abstractions for building agentic systems, but it does not remove the fundamental constraint of token limited context.
 
-Understanding agent context through tokens allows engineers to design graphs that are not just functional, but **reliable and scalable**. Tokens are not an implementation detail they are the execution medium through which intelligence is reconstructed at every step.
+Understanding agent context through tokens allows engineers to design graphs that are not just functional, but **reliable and scalable**. Tokens are not an implementation detail—they are the execution medium through which intelligence is reconstructed at every step.
 
 The best LangGraph agents are not those with the most nodes, but those with the clearest, most disciplined context.
