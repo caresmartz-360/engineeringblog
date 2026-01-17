@@ -172,7 +172,7 @@ def planner_node(state: AgentState):
 
 This improves reliability but increases token pressure.
 
-**Well designed LangGraph agents:**
+**Well-designed LangGraph agents:**
 
 - Keep plans concise
 - Summarize completed steps
