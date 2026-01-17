@@ -1,7 +1,7 @@
 ---
 layout: default
 title: "Clean Code vs Pragmatic Code: Preparing for Our Platform, Domain, and Innovation Architecture"
-date: 2026-01-16 14:30:00 +0530
+date: 2026-01-17 14:30:00 +0530
 categories: engineering architecture clean-code
 ---
 
