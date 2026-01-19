@@ -41,36 +41,13 @@ After confirming HTML injection, I proceeded to test for JavaScript execution by
 <img src="x" onerror="alert(document.cookie)" />
 ```
 
-When this payload was rendered, it successfully executed JavaScript and displayed the cookies of the logged-in user (assuming cookies were not protected with HttpOnly), confirming a stored XSS vulnerability.
+During the initial testing phase, the QA team completed the profile form using standard input values (for example, entering a simple string like “hello” in the relevant fields). The application rendered the profile correctly, and no functional issues were observed, indicating that the feature worked as expected for normal user input.
 
-During this testing phase, I observed that a member of the QA team had reported an issue titled "Target10K: Error occurring when user tries to open caregiver profile." Upon further analysis, it became evident that this issue was likely triggered by malicious or unescaped input stored through the same form fields.
+To extend the test coverage, an additional security-focused test case was introduced. In this scenario, instead of entering a name or other typical profile data, the QA team injected an HTML/JavaScript payload into the profile form fields. The purpose of this test was to verify whether the application properly sanitizes user input and safely encodes output before rendering it.
 
-Although the QA team followed standard test procedures while filling out the form fields, this additional edge case—testing with injected HTML or JavaScript content—was not initially considered. By including this scenario as an additional test case, the root cause of the reported error can be identified and reproduced more effectively.
+When the payload was rendered, the injected script executed successfully, demonstrating that the application stored and displayed user input without adequate sanitization or output encoding. This confirmed the presence of a Stored Cross-Site Scripting (XSS) vulnerability.
 
-This highlights the importance of incorporating security-focused test cases, such as input sanitization and output encoding checks, into regular QA workflows to prevent functional failures caused by security vulnerabilities.
-
-![QA reported error]({{ site.baseurl }}/assets/qa-reported-as-an-error.png)
-
-The QA team initially reported the issue as a functional defect titled "Error occurring when user tries to open caregiver profile." At first glance, it appeared to be a normal application error without an obvious root cause.
-
-![XSS test 1]({{ site.baseurl }}/assets/hello.png)
-
-QA team entered normal input (hello)
-In the initial test case, the QA team entered a normal string such as hello into the form field.
-
-![XSS test 2]({{ site.baseurl }}/assets/hello-output.png)
-
-The application rendered the output correctly, and no issues were observed. This confirmed that the functionality worked as expected for standard user input.
-
-However, I suggested adding one additional test case that goes beyond regular functional testing—specifically, testing how the application behaves when payloads are injected into input fields.
-
-![XSS test 3]({{ site.baseurl }}/assets/payload.png)
-
-Payload injection and rendered output
-
-In this test case, instead of normal text, an HTML/JavaScript payload was injected into the same input field. The application rendered and executed the payload, confirming that user input was stored and rendered without proper sanitization or output encoding.
-
-This behavior confirms the presence of a Stored Cross-Site Scripting (XSS) vulnerability.
+If the injected payload had not executed and was instead safely escaped or blocked, the application could be considered protected against XSS attacks for that input. This approach highlights the importance of validating profile form fields not only with normal data, but also with injected payloads to ensure the application is secure from XSS vulnerabilities.
 
 ### Severity Assessment
 This vulnerability is classified as High Severity because:
